@@ -63,24 +63,46 @@ const images = [
     description: "Lighthouse Coast Sea",
   },
 ];
-const gallery = document.querySelector(".gallery");
+const galleryContainer = document.querySelector(".gallery");
 
-gallery.addEventListener("click", onGalleryClick);
+const galleryMarkup = images
+  .map(
+    ({ preview, original, description }) => `
+    <li class="gallery-item">
+      <a class="gallery-link" href="${original}">
+        <img
+          class="gallery-image"
+          src="${preview}"
+          data-source="${original}"
+          alt="${description}"
+        />
+      </a>
+    </li>
+  `,
+  )
+  .join("");
 
-function onGalleryClick(event) {
-  event.preventDefault();
+galleryContainer.innerHTML = galleryMarkup;
 
-  if (!event.target.classList.contains("gallery-image")) {
-    return;
-  }
+let instance = null;
+
+galleryContainer.addEventListener("click", (event) => {
+  const link = event.target.closest("a.gallery-link");
+  if (link) event.preventDefault();
+
+  if (!event.target.classList.contains("gallery-image")) return;
 
   const largeImageURL = event.target.dataset.source;
 
-  console.log(largeImageURL);
-
-  const instance = basicLightbox.create(`
+  instance = basicLightbox.create(`
     <img src="${largeImageURL}" width="800" height="600">
   `);
 
   instance.show();
-}
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && instance) {
+    instance.close();
+  }
+});
